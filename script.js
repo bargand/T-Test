@@ -29,6 +29,248 @@ document.addEventListener("DOMContentLoaded", function () {
     RIGHT_TAILED: "rightTailed",
   };
 
+  // =====================
+  // STATISTICAL FUNCTIONS
+  // =====================
+
+  // Log Gamma function
+  function logGamma(z) {
+    if (z < 0) return NaN;
+
+    // Lanczos approximation coefficients
+    const g = 7;
+    const p = [
+      0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+      771.32342877765313, -176.61502916214059, 12.507343278686905,
+      -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
+    ];
+
+    if (z < 0.5) {
+      return (
+        Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - logGamma(1 - z)
+      );
+    }
+
+    z -= 1;
+    let x = p[0];
+    for (let i = 1; i < p.length; i++) {
+      x += p[i] / (z + i);
+    }
+    const t = z + g + 0.5;
+    return (
+      0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x)
+    );
+  }
+
+  // Gamma function
+  function gamma(z) {
+    return Math.exp(logGamma(z));
+  }
+
+  // Log Beta function
+  function logBeta(a, b) {
+    return logGamma(a) + logGamma(b) - logGamma(a + b);
+  }
+
+  // Beta function
+  function beta(a, b) {
+    return Math.exp(logBeta(a, b));
+  }
+
+  // Regularized incomplete Beta function
+  function betaReg(x, a, b) {
+    const epsilon = 1e-10;
+    const maxIterations = 1000;
+
+    if (x < 0 || x > 1 || a <= 0 || b <= 0) return NaN;
+    if (x === 0) return 0;
+    if (x === 1) return 1;
+
+    // Use continued fraction expansion
+    let aplusb = a + b;
+    let aplus1 = a + 1;
+    let aminus1 = a - 1;
+    let c = 1;
+    let d = 1 - (aplusb * x) / aplus1;
+    if (Math.abs(d) < epsilon) d = epsilon;
+    d = 1 / d;
+    let h = d;
+
+    for (let m = 1; m <= maxIterations; m++) {
+      const m2 = 2 * m;
+      let aa = (m * (b - m) * x) / ((aminus1 + m2) * (a + m2));
+      d = 1 + aa * d;
+      if (Math.abs(d) < epsilon) d = epsilon;
+      c = 1 + aa / c;
+      if (Math.abs(c) < epsilon) c = epsilon;
+      d = 1 / d;
+      h *= d * c;
+
+      aa = (-(a + m) * (aplusb + m) * x) / ((a + m2) * (aplus1 + m2));
+      d = 1 + aa * d;
+      if (Math.abs(d) < epsilon) d = epsilon;
+      c = 1 + aa / c;
+      if (Math.abs(c) < epsilon) c = epsilon;
+      d = 1 / d;
+      const del = d * c;
+      h *= del;
+
+      if (Math.abs(del - 1) < epsilon) break;
+    }
+
+    return Math.exp(
+      Math.log(h) +
+        a * Math.log(x) +
+        b * Math.log(1 - x) -
+        Math.log(a) -
+        logBeta(a, b)
+    );
+  }
+
+  // Student's t CDF
+  function tCDF(t, df) {
+    if (df <= 0) return NaN;
+
+    const x = df / (t * t + df);
+    const a = df / 2;
+    const b = 0.5;
+
+    const ibeta = betaReg(x, a, b);
+    return t > 0 ? 1 - ibeta / 2 : ibeta / 2;
+  }
+
+  // Inverse Normal CDF (Probit function)
+  function inverseNormalCDF(p) {
+    // Coefficients in rational approximations
+    const a = [
+      -3.969683028665376e1, 2.209460984245205e2, -2.759285104469687e2,
+      1.38357751867269e2, -3.066479806614716e1, 2.506628277459239,
+    ];
+
+    const b = [
+      -5.447609879822406e1, 1.615858368580409e2, -1.556989798598866e2,
+      6.680131188771972e1, -1.328068155288572e1,
+    ];
+
+    const c = [
+      -7.784894002430293e-3, -3.223964580411365e-1, -2.400758277161838,
+      -2.549732539343734, 4.374664141464968, 2.938163982698783,
+    ];
+
+    const d = [
+      7.784695709041462e-3, 3.224671290700398e-1, 2.445134137142996,
+      3.754408661907416,
+    ];
+
+    // Define break-points
+    const plow = 0.02425;
+    const phigh = 1 - plow;
+
+    let q, r;
+
+    if (p < plow) {
+      // Rational approximation for lower region
+      q = Math.sqrt(-2 * Math.log(p));
+      return (
+        ((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q +
+        c[5] / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+      );
+    } else if (p <= phigh) {
+      // Rational approximation for central region
+      q = p - 0.5;
+      r = q * q;
+      return (
+        ((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r +
+        (a[5] * q) /
+          (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
+      );
+    } else {
+      // Rational approximation for upper region
+      q = Math.sqrt(-2 * Math.log(1 - p));
+      return -(
+        ((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q +
+        c[5] / ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+      );
+    }
+  }
+
+  // Inverse t CDF
+  // Inverse t CDF (quantile function)
+  function inverseTCDF(p, df) {
+    // Simple approximation for common cases
+    if (df === 1) {
+      return Math.tan(Math.PI * (p - 0.5));
+    }
+    if (df === 2) {
+      return (p - 0.5) * Math.sqrt(2 / (p * (1 - p)));
+    }
+
+    // For df > 2, use normal approximation with correction
+    const x = inverseNormalCDF(p);
+    const g1 = (x * (x * x + 1)) / (4 * df);
+    const g2 = (x * (5 * x * x * x + 16 * x * x + 3)) / (96 * df * df);
+    const g3 =
+      (x * (3 * x * x * x * x * x + 19 * x * x * x * x + 17 * x * x - 15)) /
+      (384 * df * df * df);
+
+    return x + g1 + g2 + g3;
+  }
+
+  // Calculate p-value based on t-score and tail type
+  function calculatePValue(tScore, df, tail) {
+    const absT = Math.abs(tScore);
+    let pValue = 2 * (1 - tCDF(absT, df));
+
+    switch (tail) {
+      case TAIL_TYPES.LEFT_TAILED:
+        pValue = tScore < 0 ? pValue / 2 : 1 - pValue / 2;
+        break;
+      case TAIL_TYPES.RIGHT_TAILED:
+        pValue = tScore > 0 ? pValue / 2 : 1 - pValue / 2;
+        break;
+    }
+
+    return pValue;
+  }
+
+  // Get critical value based on alpha, degrees of freedom, and tail type
+  // Get critical value based on alpha, degrees of freedom, and tail type
+  function getCriticalValue(alpha, df, tail) {
+    // Ensure df is a finite number
+    if (!Number.isFinite(df) || df <= 0) {
+      console.error("Invalid degrees of freedom:", df);
+      return NaN;
+    }
+
+    // Ensure alpha is valid
+    if (alpha <= 0 || alpha >= 1) {
+      console.error("Invalid alpha value:", alpha);
+      return NaN;
+    }
+
+    // Calculate based on tail type
+    try {
+      switch (tail) {
+        case TAIL_TYPES.LEFT_TAILED:
+          return inverseTCDF(alpha, df);
+        case TAIL_TYPES.RIGHT_TAILED:
+          return inverseTCDF(1 - alpha, df);
+        case TAIL_TYPES.TWO_TAILED:
+          return Math.abs(inverseTCDF(alpha / 2, df));
+        default:
+          console.error("Invalid tail type:", tail);
+          return NaN;
+      }
+    } catch (e) {
+      console.error("Error calculating critical value:", e);
+      return NaN;
+    }
+  }
+
+  // =====================
+  // APPLICATION FUNCTIONS
+  // =====================
+
   // Initialize the application
   function init() {
     setupEventListeners();
@@ -654,178 +896,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return Math.sqrt(variance);
   }
 
-  // Calculate p-value based on t-score and tail type
-  function calculatePValue(tScore, df, tail) {
-    // Implementation of Student's t CDF (approximation)
-    const tCDF = (t, df) => {
-      if (df <= 0) return NaN;
-
-      const x = (t * t) / (t * t + df);
-      const a = df / 2;
-      const b = 0.5;
-
-      // Regularized incomplete beta function
-      const betaReg = (x, a, b) => {
-        const epsilon = 1e-10;
-        const maxIterations = 1000;
-
-        if (x < 0 || x > 1 || a <= 0 || b <= 0) return NaN;
-        if (x === 0) return 0;
-        if (x === 1) return 1;
-
-        // Use continued fraction expansion
-        let aplusb = a + b;
-        let aplus1 = a + 1;
-        let aminus1 = a - 1;
-        let c = 1;
-        let d = 1 - (aplusb * x) / aplus1;
-        if (Math.abs(d) < epsilon) d = epsilon;
-        d = 1 / d;
-        let h = d;
-
-        for (let m = 1; m <= maxIterations; m++) {
-          const m2 = 2 * m;
-          let aa = (m * (b - m) * x) / ((aminus1 + m2) * (a + m2));
-          d = 1 + aa * d;
-          if (Math.abs(d) < epsilon) d = epsilon;
-          c = 1 + aa / c;
-          if (Math.abs(c) < epsilon) c = epsilon;
-          d = 1 / d;
-          h *= d * c;
-
-          aa = (-(a + m) * (aplusb + m) * x) / ((a + m2) * (aplus1 + m2));
-          d = 1 + aa * d;
-          if (Math.abs(d) < epsilon) d = epsilon;
-          c = 1 + aa / c;
-          if (Math.abs(c) < epsilon) c = epsilon;
-          d = 1 / d;
-          const del = d * c;
-          h *= del;
-
-          if (Math.abs(del - 1) < epsilon) break;
-        }
-
-        return Math.exp(
-          Math.log(h) +
-            a * Math.log(x) +
-            b * Math.log(1 - x) -
-            Math.log(a) -
-            logBeta(a, b)
-        );
-      };
-
-      // Log of Beta function
-      const logBeta = (a, b) => {
-        return logGamma(a) + logGamma(b) - logGamma(a + b);
-      };
-
-      // Log of Gamma function
-      const logGamma = (z) => {
-        if (z < 0) return NaN;
-
-        const gamma = 0.57721566490153286060651209;
-        const coefficients = [
-          0.99999999999980993, 676.5203681218851, -1259.1392167224028,
-          771.32342877765313, -176.61502916214059, 12.507343278686905,
-          -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
-        ];
-
-        if (z < 0.5) {
-          return (
-            Math.log(Math.PI) -
-            Math.log(Math.sin(Math.PI * z)) -
-            logGamma(1 - z)
-          );
-        }
-
-        z -= 1;
-        let x = coefficients[0];
-        for (let i = 1; i < coefficients.length; i++) {
-          x += coefficients[i] / (z + i);
-        }
-        const t = z + coefficients.length - 0.5;
-        return (
-          0.5 * Math.log(2 * Math.PI) +
-          (z + 0.5) * Math.log(t) -
-          t +
-          Math.log(x)
-        );
-      };
-
-      const ibeta = betaReg(x, a, b);
-      return t > 0 ? ibeta / 2 : 1 - ibeta / 2;
-    };
-
-    const absT = Math.abs(tScore);
-    let pValue = 2 * (1 - tCDF(absT, df));
-
-    switch (tail) {
-      case TAIL_TYPES.LEFT_TAILED:
-        pValue = tScore < 0 ? pValue / 2 : 1 - pValue / 2;
-        break;
-      case TAIL_TYPES.RIGHT_TAILED:
-        pValue = tScore > 0 ? pValue / 2 : 1 - pValue / 2;
-        break;
-    }
-
-    return pValue;
-  }
-
-  // Get critical value based on alpha, degrees of freedom, and tail type
-  function getCriticalValue(alpha, df, tail) {
-    // Implementation of inverse Student's t CDF (approximation)
-    const inverseTCDF = (p, df) => {
-      if (df <= 0) return NaN;
-      if (p <= 0 || p >= 1) return NaN;
-
-      // Use Newton-Raphson method to find the inverse
-      const tCDF = (t, df) => {
-        // Same implementation as above
-        // ... (omitted for brevity, same as calculatePValue)
-      };
-
-      // Initial guess using normal approximation
-      let t = inverseNormalCDF(p);
-      if (isNaN(t)) t = 0;
-
-      const maxIterations = 100;
-      const tolerance = 1e-10;
-
-      for (let i = 0; i < maxIterations; i++) {
-        const cdf = tCDF(t, df);
-        const pdf = Math.exp(
-          logGamma((df + 1) / 2) -
-            logGamma(df / 2) -
-            0.5 * Math.log(Math.PI * df) -
-            ((df + 1) / 2) * Math.log(1 + (t * t) / df)
-        );
-
-        const delta = (cdf - p) / pdf;
-        t -= delta;
-
-        if (Math.abs(delta) < tolerance) break;
-      }
-
-      return t;
-    };
-
-    const inverseNormalCDF = (p) => {
-      // Same implementation as in the z-test calculator
-      // ... (omitted for brevity)
-    };
-
-    switch (tail) {
-      case TAIL_TYPES.LEFT_TAILED:
-        return inverseTCDF(alpha, df);
-      case TAIL_TYPES.RIGHT_TAILED:
-        return inverseTCDF(1 - alpha, df);
-      case TAIL_TYPES.TWO_TAILED:
-        return Math.abs(inverseTCDF(alpha / 2, df));
-      default:
-        throw new Error("Invalid tail type specified");
-    }
-  }
-
+  // Display hypothesis test results
   // Display hypothesis test results
   function displayHypothesisResults(
     testType,
@@ -837,53 +908,41 @@ document.addEventListener("DOMContentLoaded", function () {
     tail,
     df
   ) {
-    const testName = getTestName(testType);
-    const comparison = getComparisonText(criticalValue, tail);
-    const tailDescription = getTailDescription(tail);
+    // Format critical value properly
+    let criticalValueDisplay = isNaN(criticalValue)
+      ? "N/A"
+      : criticalValue.toFixed(4);
+    let comparison = getComparisonText(criticalValue, tail);
 
     resultContent.innerHTML = `
-            <div class="result-item">
-                <strong>Test Performed:</strong> ${testName}
-            </div>
-            <div class="result-item">
-                <strong>Degrees of Freedom:</strong> ${df.toFixed(2)}
-            </div>
-            <div class="result-item">
-                <strong>T-Score:</strong> ${tScore.toFixed(4)}
-            </div>
-            <div class="result-item">
-                <strong>p-value:</strong> ${pValue.toExponential(4)}
-            </div>
-            <div class="result-item">
-                <strong>Significance Level (α):</strong> ${alpha}
-            </div>
-            <div class="result-item">
-                <strong>Critical Value:</strong> ${comparison}
-            </div>
-            <div class="result-item ${
-              isSignificant ? "significant" : "not-significant"
-            }">
-                <strong>Conclusion:</strong> ${
-                  isSignificant
-                    ? "Reject the null hypothesis (H₀). The result is statistically significant."
-                    : "Fail to reject the null hypothesis (H₀). The result is not statistically significant."
-                }
-            </div>
-            <div class="critical-value">
-                <strong>Interpretation:</strong> 
-                <p>A ${tailDescription} test was performed at α = ${alpha} level of significance with ${df.toFixed(
-      2
-    )} degrees of freedom.</p>
-                <p>The calculated p-value (${pValue.toExponential(4)}) is ${
-      pValue < alpha ? "less" : "greater"
-    } than α.</p>
-                <p>T-score of ${tScore.toFixed(4)} ${
-      isSignificant
-        ? "falls in the critical region"
-        : "does not fall in the critical region"
-    }.</p>
-            </div>
-        `;
+        <div class="result-item">
+            <strong>Test Performed:</strong> ${getTestName(testType)}
+        </div>
+        <div class="result-item">
+            <strong>Degrees of Freedom:</strong> ${df.toFixed(2)}
+        </div>
+        <div class="result-item">
+            <strong>T-Score:</strong> ${tScore.toFixed(4)}
+        </div>
+        <div class="result-item">
+            <strong>p-value:</strong> ${pValue.toExponential(4)}
+        </div>
+        <div class="result-item">
+            <strong>Significance Level (α):</strong> ${alpha}
+        </div>
+        <div class="result-item">
+            <strong>Critical Value:</strong> ${criticalValueDisplay} ${comparison}
+        </div>
+        <div class="result-item ${
+          isSignificant ? "significant" : "not-significant"
+        }">
+            <strong>Conclusion:</strong> ${
+              isSignificant
+                ? "Reject the null hypothesis (H₀). The result is statistically significant."
+                : "Fail to reject the null hypothesis (H₀). The result is not statistically significant."
+            }
+        </div>
+    `;
   }
 
   // Display confidence interval results
