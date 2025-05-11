@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive T-Test Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Comprehensive T-Test Calculator</h1>
+        
+        <div class="test-selection">
+            <h2>Select Analysis Type</h2>
+            <select id="testType">
+                <option value="">-- Select Test Type --</option>
+                <optgroup label="Hypothesis Tests">
+                    <option value="oneSample">One-Sample T-Test</option>
+                    <option value="twoSample">Two-Sample T-Test</option>
+                    <option value="paired">Paired T-Test</option>
+                </optgroup>
+                <optgroup label="Confidence Intervals">
+                    <option value="ciSingleMean">CI for Single Mean</option>
+                    <option value="ciTwoMeans">CI for Two Independent Means</option>
+                    <option value="ciPaired">CI for Paired Differences</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div id="inputForm" class="hidden">
+            <h2>Test Parameters</h2>
+            <form id="tTestForm">
+                <!-- Dynamic inputs will go here -->
+            </form>
+
+            <div id="hypothesisSection" class="hidden">
+                <h2>Hypothesis Testing</h2>
+                <div>
+                    <label>Null Hypothesis (H₀):</label>
+                    <span id="nullHypothesis"></span>
+                </div>
+                <div>
+                    <label>Alternative Hypothesis (H₁):</label>
+                    <span id="altHypothesis"></span>
+                </div>
+                <div>
+                    <label>Test Type:</label>
+                    <select id="tailType">
+                        <option value="twoTailed">Two-Tailed Test</option>
+                        <option value="leftTailed">Left-Tailed Test (H₁: <)</option>
+                        <option value="rightTailed">Right-Tailed Test (H₁: >)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Significance Level (α):</label>
+                    <select id="significanceLevel">
+                        <option value="0.01">0.01 (1%)</option>
+                        <option value="0.05" selected>0.05 (5%)</option>
+                        <option value="0.10">0.10 (10%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="confidenceSection" class="hidden">
+                <h2>Confidence Interval</h2>
+                <div>
+                    <label>Confidence Level:</label>
+                    <select id="confidenceLevel">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+
+            <button id="calculateBtn">Calculate</button>
+        </div>
+
+        <div id="results" class="hidden">
+            <h2>Analysis Results</h2>
+            <div id="resultContent"></div>
+            <button id="newTestBtn">Perform New Analysis</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
