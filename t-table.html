@@ -3,19 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Interactive T-Distribution Table</title>
+    <title>T-Distribution Tables</title>
     <style>
       :root {
-        --primary-color: #4361ee;
-        --secondary-color: #3f37c9;
-        --accent-color: #4895ef;
-        --light-color: #f8f9fa;
-        --dark-color: #212529;
-        --success-color: #4cc9f0;
-        --warning-color: #f72585;
+        --primary: #3a86ff;
+        --primary-dark: #2667cc;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
         --border-radius: 8px;
-        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        --transition: all 0.3s ease;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
 
       * {
@@ -27,109 +24,69 @@
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         line-height: 1.6;
-        color: var(--dark-color);
-        background-color: #f5f7fa;
-        padding: 20px;
+        color: var(--dark);
+        background-color: #f1f5f9;
+        padding: 2rem;
       }
 
       .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 20px;
       }
 
       header {
         text-align: center;
-        margin-bottom: 30px;
-        padding: 20px 0;
-        background-color: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
       }
 
       h1 {
-        color: var(--secondary-color);
-        margin-bottom: 10px;
-        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        font-size: 2.2rem;
       }
 
       .subtitle {
-        color: #6c757d;
+        color: var(--gray);
         font-size: 1.1rem;
       }
 
-      .controls {
-        background-color: white;
-        padding: 20px;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        margin-bottom: 20px;
+      .toggle-container {
         display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        align-items: center;
-      }
-
-      .control-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      label {
-        font-weight: 500;
-        color: var(--secondary-color);
-        white-space: nowrap;
-      }
-
-      select,
-      button {
-        padding: 10px 15px;
-        border: 1px solid #ced4da;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        background: white;
         border-radius: var(--border-radius);
-        font-size: 1rem;
-        transition: var(--transition);
+        box-shadow: var(--shadow);
+        padding: 0.5rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
       }
 
-      select {
-        min-width: 150px;
-        background-color: white;
-        cursor: pointer;
-      }
-
-      select:focus {
-        outline: none;
-        border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.25);
-      }
-
-      button {
-        background-color: var(--primary-color);
-        color: white;
+      .toggle-btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
         border: none;
+        background: none;
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--gray);
         cursor: pointer;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        transition: all 0.3s ease;
+        border-radius: calc(var(--border-radius) - 2px);
       }
 
-      button:hover {
-        background-color: var(--secondary-color);
-        transform: translateY(-2px);
-      }
-
-      button:active {
-        transform: translateY(0);
+      .toggle-btn.active {
+        background-color: var(--primary);
+        color: white;
       }
 
       .table-container {
         background-color: white;
         border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
+        box-shadow: var(--shadow);
         overflow-x: auto;
-        padding: 10px;
-        margin-bottom: 30px;
+        margin-bottom: 2rem;
       }
 
       table {
@@ -140,59 +97,35 @@
 
       th,
       td {
-        padding: 12px 15px;
+        padding: 0.75rem 1rem;
         text-align: center;
         border: 1px solid #e9ecef;
+        min-width: 70px;
       }
 
       th {
-        background-color: var(--primary-color);
+        background-color: var(--primary);
         color: white;
-        font-weight: 500;
+        font-weight: 600;
         position: sticky;
         top: 0;
       }
 
       tr:nth-child(even) {
-        background-color: #f8f9fa;
+        background-color: #f8fafc;
       }
 
       tr:hover {
-        background-color: #e9f7fe;
+        background-color: #f1f8ff;
       }
 
-      .tooltip {
-        position: relative;
-        cursor: pointer;
-      }
-
-      .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 240px;
-        background-color: var(--dark-color);
-        color: white;
-        text-align: center;
-        border-radius: var(--border-radius);
-        padding: 12px;
-        position: absolute;
-        z-index: 100;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%);
-        opacity: 0;
-        transition: var(--transition);
-        font-size: 0.9rem;
-        line-height: 1.5;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-
-      .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
+      .z-row {
+        background-color: #e3f2fd;
+        font-weight: 500;
       }
 
       .highlight {
-        background-color: #fff3bf !important;
+        background-color: #fff3bf;
         font-weight: bold;
         position: relative;
       }
@@ -204,79 +137,27 @@
         right: 2px;
         bottom: 2px;
         left: 2px;
-        border: 2px solid var(--warning-color);
+        border: 2px solid #f72585;
         border-radius: 4px;
         pointer-events: none;
       }
 
-      .z-row {
-        background-color: #e3f2fd;
-        font-weight: 500;
-      }
-
-      .confidence-row {
-        background-color: #e8f5e9;
-        font-weight: 500;
-      }
-
-      .info-panel {
-        background-color: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--box-shadow);
-        padding: 20px;
-        margin-top: 20px;
-      }
-
-      .info-panel h3 {
-        color: var(--secondary-color);
-        margin-bottom: 15px;
-        font-size: 1.2rem;
-      }
-
-      .info-panel p {
-        margin-bottom: 10px;
-        line-height: 1.7;
-      }
-
-      .key {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 15px;
-      }
-
-      .key-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.9rem;
-      }
-
-      .key-color {
-        width: 16px;
-        height: 16px;
-        border-radius: 3px;
+      .hidden {
+        display: none;
       }
 
       @media (max-width: 768px) {
-        .controls {
-          flex-direction: column;
-          align-items: stretch;
+        body {
+          padding: 1rem;
         }
 
-        .control-group {
+        .toggle-container {
           flex-direction: column;
-          align-items: stretch;
-        }
-
-        select,
-        button {
-          width: 100%;
         }
 
         th,
         td {
-          padding: 8px 10px;
+          padding: 0.5rem;
           font-size: 0.85rem;
         }
       }
@@ -285,1031 +166,325 @@
   <body>
     <div class="container">
       <header>
-        <h1>T-Distribution Table</h1>
-        <p class="subtitle">
-          Interactive reference table for t-test critical values
-        </p>
+        <h1>T-Distribution Tables</h1>
+        <p class="subtitle">Critical values for t-tests</p>
       </header>
 
-      <div class="controls">
-        <div class="control-group">
-          <label for="dfSelect">Degrees of Freedom:</label>
-          <select id="dfSelect">
-            <option value="all">Show All</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-            <option value="30">30</option>
-            <option value="40">40</option>
-            <option value="60">60</option>
-            <option value="80">80</option>
-            <option value="100">100</option>
-            <option value="z">Z (Normal)</option>
-          </select>
-        </div>
-
-        <div class="control-group">
-          <label for="probSelect">Probability Level:</label>
-          <select id="probSelect">
-            <option value="all">Show All</option>
-            <option value="50">50% (t₅₀)</option>
-            <option value="75">75% (t₇₅)</option>
-            <option value="80">80% (t₈₀)</option>
-            <option value="85">85% (t₈₅)</option>
-            <option value="90">90% (t₉₀)</option>
-            <option value="95">95% (t₉₅)</option>
-            <option value="975">97.5% (t₉₇₅)</option>
-            <option value="99">99% (t₉₉)</option>
-            <option value="995">99.5% (t₉₉₅)</option>
-            <option value="999">99.9% (t₉₉₉)</option>
-            <option value="998">99.8% (t₉₉₈)</option>
-          </select>
-        </div>
-
-        <button id="highlightBtn">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM8 1.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13z"
-            />
-            <path d="M8 14a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
-          </svg>
-          Highlight Selection
-        </button>
-
-        <button id="resetBtn">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"
-            />
-            <path
-              d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"
-            />
-          </svg>
-          Reset
-        </button>
+      <div class="toggle-container">
+        <button id="oneTailBtn" class="toggle-btn active">One-Tailed</button>
+        <button id="twoTailBtn" class="toggle-btn">Two-Tailed</button>
       </div>
 
-      <div class="table-container">
-        <table id="tTable">
-          <!-- Table will be generated by JavaScript -->
+      <!-- One-Tailed Table -->
+      <div id="oneTailTable" class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2">df</th>
+              <th colspan="9">One-Tailed Critical Values (α)</th>
+            </tr>
+            <tr>
+              <th>0.50</th>
+              <th>0.25</th>
+              <th>0.20</th>
+              <th>0.15</th>
+              <th>0.10</th>
+              <th>0.05</th>
+              <th>0.025</th>
+              <th>0.01</th>
+              <th>0.005</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>0.000</td>
+              <td>1.000</td>
+              <td>1.376</td>
+              <td>1.963</td>
+              <td>3.078</td>
+              <td>6.314</td>
+              <td>12.71</td>
+              <td>31.82</td>
+              <td>63.66</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>0.000</td>
+              <td>0.816</td>
+              <td>1.061</td>
+              <td>1.386</td>
+              <td>1.886</td>
+              <td>2.920</td>
+              <td>4.303</td>
+              <td>6.965</td>
+              <td>9.925</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>0.000</td>
+              <td>0.765</td>
+              <td>0.978</td>
+              <td>1.250</td>
+              <td>1.638</td>
+              <td>2.353</td>
+              <td>3.182</td>
+              <td>4.541</td>
+              <td>5.841</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>0.000</td>
+              <td>0.741</td>
+              <td>0.941</td>
+              <td>1.190</td>
+              <td>1.533</td>
+              <td>2.132</td>
+              <td>2.776</td>
+              <td>3.747</td>
+              <td>4.604</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>0.000</td>
+              <td>0.727</td>
+              <td>0.920</td>
+              <td>1.156</td>
+              <td>1.476</td>
+              <td>2.015</td>
+              <td>2.571</td>
+              <td>3.365</td>
+              <td>4.032</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>0.000</td>
+              <td>0.700</td>
+              <td>0.879</td>
+              <td>1.093</td>
+              <td>1.372</td>
+              <td>1.812</td>
+              <td>2.228</td>
+              <td>2.764</td>
+              <td>3.169</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>0.000</td>
+              <td>0.691</td>
+              <td>0.866</td>
+              <td>1.074</td>
+              <td>1.341</td>
+              <td>1.753</td>
+              <td>2.131</td>
+              <td>2.602</td>
+              <td>2.947</td>
+            </tr>
+            <tr>
+              <td>20</td>
+              <td>0.000</td>
+              <td>0.687</td>
+              <td>0.860</td>
+              <td>1.064</td>
+              <td>1.325</td>
+              <td>1.725</td>
+              <td>2.086</td>
+              <td>2.528</td>
+              <td>2.845</td>
+            </tr>
+            <tr>
+              <td>30</td>
+              <td>0.000</td>
+              <td>0.683</td>
+              <td>0.854</td>
+              <td>1.055</td>
+              <td>1.310</td>
+              <td>1.697</td>
+              <td>2.042</td>
+              <td>2.457</td>
+              <td>2.750</td>
+            </tr>
+            <tr class="z-row">
+              <td>Z</td>
+              <td>0.000</td>
+              <td>0.674</td>
+              <td>0.842</td>
+              <td>1.036</td>
+              <td>1.282</td>
+              <td>1.645</td>
+              <td>1.960</td>
+              <td>2.326</td>
+              <td>2.576</td>
+            </tr>
+          </tbody>
         </table>
       </div>
 
-      <div class="info-panel">
-        <h3>How to Use This Table</h3>
-        <p>
-          Hover over any value to see detailed information about that t-value,
-          including degrees of freedom and corresponding probabilities.
-        </p>
-        <p>
-          Use the controls above to filter and highlight specific degrees of
-          freedom or probability levels.
-        </p>
-
-        <div class="key">
-          <div class="key-item">
-            <div class="key-color" style="background-color: #4361ee"></div>
-            <span>Table Headers</span>
-          </div>
-          <div class="key-item">
-            <div class="key-color" style="background-color: #e3f2fd"></div>
-            <span>Normal Distribution (Z) Values</span>
-          </div>
-          <div class="key-item">
-            <div class="key-color" style="background-color: #e8f5e9"></div>
-            <span>Confidence Levels</span>
-          </div>
-          <div class="key-item">
-            <div
-              class="key-color"
-              style="background-color: #fff3bf; border: 1px solid #ddd"
-            ></div>
-            <span>Highlighted Values</span>
-          </div>
-        </div>
+      <!-- Two-Tailed Table -->
+      <div id="twoTailTable" class="table-container hidden">
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2">df</th>
+              <th colspan="9">Two-Tailed Critical Values (α)</th>
+            </tr>
+            <tr>
+              <th>1.00</th>
+              <th>0.50</th>
+              <th>0.40</th>
+              <th>0.30</th>
+              <th>0.20</th>
+              <th>0.10</th>
+              <th>0.05</th>
+              <th>0.02</th>
+              <th>0.01</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>0.000</td>
+              <td>1.000</td>
+              <td>1.376</td>
+              <td>1.963</td>
+              <td>3.078</td>
+              <td>6.314</td>
+              <td>12.71</td>
+              <td>31.82</td>
+              <td>63.66</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>0.000</td>
+              <td>0.816</td>
+              <td>1.061</td>
+              <td>1.386</td>
+              <td>1.886</td>
+              <td>2.920</td>
+              <td>4.303</td>
+              <td>6.965</td>
+              <td>9.925</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>0.000</td>
+              <td>0.765</td>
+              <td>0.978</td>
+              <td>1.250</td>
+              <td>1.638</td>
+              <td>2.353</td>
+              <td>3.182</td>
+              <td>4.541</td>
+              <td>5.841</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>0.000</td>
+              <td>0.741</td>
+              <td>0.941</td>
+              <td>1.190</td>
+              <td>1.533</td>
+              <td>2.132</td>
+              <td>2.776</td>
+              <td>3.747</td>
+              <td>4.604</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>0.000</td>
+              <td>0.727</td>
+              <td>0.920</td>
+              <td>1.156</td>
+              <td>1.476</td>
+              <td>2.015</td>
+              <td>2.571</td>
+              <td>3.365</td>
+              <td>4.032</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>0.000</td>
+              <td>0.700</td>
+              <td>0.879</td>
+              <td>1.093</td>
+              <td>1.372</td>
+              <td>1.812</td>
+              <td>2.228</td>
+              <td>2.764</td>
+              <td>3.169</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>0.000</td>
+              <td>0.691</td>
+              <td>0.866</td>
+              <td>1.074</td>
+              <td>1.341</td>
+              <td>1.753</td>
+              <td>2.131</td>
+              <td>2.602</td>
+              <td>2.947</td>
+            </tr>
+            <tr>
+              <td>20</td>
+              <td>0.000</td>
+              <td>0.687</td>
+              <td>0.860</td>
+              <td>1.064</td>
+              <td>1.325</td>
+              <td>1.725</td>
+              <td>2.086</td>
+              <td>2.528</td>
+              <td>2.845</td>
+            </tr>
+            <tr>
+              <td>30</td>
+              <td>0.000</td>
+              <td>0.683</td>
+              <td>0.854</td>
+              <td>1.055</td>
+              <td>1.310</td>
+              <td>1.697</td>
+              <td>2.042</td>
+              <td>2.457</td>
+              <td>2.750</td>
+            </tr>
+            <tr class="z-row">
+              <td>Z</td>
+              <td>0.000</td>
+              <td>0.674</td>
+              <td>0.842</td>
+              <td>1.036</td>
+              <td>1.282</td>
+              <td>1.645</td>
+              <td>1.960</td>
+              <td>2.326</td>
+              <td>2.576</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <script>
-      // T-table data
-      const tTableData = {
-        headers: [
-          "cum. prob",
-          "t₅₀",
-          "t₇₅",
-          "t₈₀",
-          "t₈₅",
-          "t₉₀",
-          "t₉₅",
-          "t₉₇₅",
-          "t₉₉",
-          "t₉₉₅",
-          "t₉₉₉",
-          "t₉₉₈",
-        ],
-        oneTail: [
-          "one-tail",
-          "0.50",
-          "0.25",
-          "0.20",
-          "0.15",
-          "0.10",
-          "0.05",
-          "0.025",
-          "0.01",
-          "0.005",
-          "0.001",
-          "0.0005",
-        ],
-        twoTails: [
-          "two-tails",
-          "1.00",
-          "0.50",
-          "0.40",
-          "0.30",
-          "0.20",
-          "0.10",
-          "0.05",
-          "0.02",
-          "0.01",
-          "0.002",
-          "0.001",
-        ],
-        confidence: [
-          "Confidence",
-          "0%",
-          "50%",
-          "60%",
-          "70%",
-          "80%",
-          "90%",
-          "95%",
-          "98%",
-          "99%",
-          "99.8%",
-          "99.9%",
-        ],
-        rows: [
-          {
-            df: 1,
-            values: [
-              "0.000",
-              "1.000",
-              "1.376",
-              "1.963",
-              "3.078",
-              "6.314",
-              "12.71",
-              "31.82",
-              "63.66",
-              "318.31",
-              "636.62",
-            ],
-          },
-          {
-            df: 2,
-            values: [
-              "0.000",
-              "0.816",
-              "1.061",
-              "1.386",
-              "1.886",
-              "2.920",
-              "4.303",
-              "6.965",
-              "9.925",
-              "22.327",
-              "31.599",
-            ],
-          },
-          {
-            df: 3,
-            values: [
-              "0.000",
-              "0.765",
-              "0.978",
-              "1.250",
-              "1.638",
-              "2.353",
-              "3.182",
-              "4.541",
-              "5.841",
-              "10.215",
-              "12.924",
-            ],
-          },
-          {
-            df: 4,
-            values: [
-              "0.000",
-              "0.741",
-              "0.941",
-              "1.190",
-              "1.533",
-              "2.132",
-              "2.776",
-              "3.747",
-              "4.604",
-              "7.173",
-              "8.610",
-            ],
-          },
-          {
-            df: 5,
-            values: [
-              "0.000",
-              "0.727",
-              "0.920",
-              "1.156",
-              "1.476",
-              "2.015",
-              "2.571",
-              "3.365",
-              "4.032",
-              "5.893",
-              "6.869",
-            ],
-          },
-          {
-            df: 6,
-            values: [
-              "0.000",
-              "0.718",
-              "0.906",
-              "1.134",
-              "1.440",
-              "1.943",
-              "2.447",
-              "3.143",
-              "3.707",
-              "5.208",
-              "5.959",
-            ],
-          },
-          {
-            df: 7,
-            values: [
-              "0.000",
-              "0.711",
-              "0.896",
-              "1.119",
-              "1.415",
-              "1.895",
-              "2.365",
-              "2.998",
-              "3.499",
-              "4.785",
-              "5.408",
-            ],
-          },
-          {
-            df: 8,
-            values: [
-              "0.000",
-              "0.706",
-              "0.889",
-              "1.108",
-              "1.397",
-              "1.860",
-              "2.306",
-              "2.896",
-              "3.355",
-              "4.501",
-              "5.041",
-            ],
-          },
-          {
-            df: 9,
-            values: [
-              "0.000",
-              "0.703",
-              "0.883",
-              "1.100",
-              "1.383",
-              "1.833",
-              "2.262",
-              "2.821",
-              "3.250",
-              "4.297",
-              "4.781",
-            ],
-          },
-          {
-            df: 10,
-            values: [
-              "0.000",
-              "0.700",
-              "0.879",
-              "1.093",
-              "1.372",
-              "1.812",
-              "2.228",
-              "2.764",
-              "3.169",
-              "4.144",
-              "4.587",
-            ],
-          },
-          {
-            df: 11,
-            values: [
-              "0.000",
-              "0.697",
-              "0.876",
-              "1.088",
-              "1.363",
-              "1.796",
-              "2.201",
-              "2.718",
-              "3.106",
-              "4.025",
-              "4.437",
-            ],
-          },
-          {
-            df: 12,
-            values: [
-              "0.000",
-              "0.695",
-              "0.873",
-              "1.083",
-              "1.356",
-              "1.782",
-              "2.179",
-              "2.681",
-              "3.055",
-              "3.930",
-              "4.318",
-            ],
-          },
-          {
-            df: 13,
-            values: [
-              "0.000",
-              "0.694",
-              "0.870",
-              "1.079",
-              "1.350",
-              "1.771",
-              "2.160",
-              "2.650",
-              "3.012",
-              "3.852",
-              "4.221",
-            ],
-          },
-          {
-            df: 14,
-            values: [
-              "0.000",
-              "0.692",
-              "0.868",
-              "1.076",
-              "1.345",
-              "1.761",
-              "2.145",
-              "2.624",
-              "2.977",
-              "3.787",
-              "4.140",
-            ],
-          },
-          {
-            df: 15,
-            values: [
-              "0.000",
-              "0.691",
-              "0.866",
-              "1.074",
-              "1.341",
-              "1.753",
-              "2.131",
-              "2.602",
-              "2.947",
-              "3.733",
-              "4.073",
-            ],
-          },
-          {
-            df: 16,
-            values: [
-              "0.000",
-              "0.690",
-              "0.865",
-              "1.071",
-              "1.337",
-              "1.746",
-              "2.120",
-              "2.583",
-              "2.921",
-              "3.686",
-              "4.015",
-            ],
-          },
-          {
-            df: 17,
-            values: [
-              "0.000",
-              "0.689",
-              "0.863",
-              "1.069",
-              "1.333",
-              "1.740",
-              "2.110",
-              "2.567",
-              "2.898",
-              "3.646",
-              "3.965",
-            ],
-          },
-          {
-            df: 18,
-            values: [
-              "0.000",
-              "0.688",
-              "0.862",
-              "1.067",
-              "1.330",
-              "1.734",
-              "2.101",
-              "2.552",
-              "2.878",
-              "3.610",
-              "3.922",
-            ],
-          },
-          {
-            df: 19,
-            values: [
-              "0.000",
-              "0.688",
-              "0.861",
-              "1.066",
-              "1.328",
-              "1.729",
-              "2.093",
-              "2.539",
-              "2.861",
-              "3.579",
-              "3.883",
-            ],
-          },
-          {
-            df: 20,
-            values: [
-              "0.000",
-              "0.687",
-              "0.860",
-              "1.064",
-              "1.325",
-              "1.725",
-              "2.086",
-              "2.528",
-              "2.845",
-              "3.552",
-              "3.850",
-            ],
-          },
-          {
-            df: 21,
-            values: [
-              "0.000",
-              "0.686",
-              "0.859",
-              "1.063",
-              "1.323",
-              "1.721",
-              "2.080",
-              "2.518",
-              "2.831",
-              "3.527",
-              "3.819",
-            ],
-          },
-          {
-            df: 22,
-            values: [
-              "0.000",
-              "0.686",
-              "0.858",
-              "1.061",
-              "1.321",
-              "1.717",
-              "2.074",
-              "2.508",
-              "2.819",
-              "3.505",
-              "3.792",
-            ],
-          },
-          {
-            df: 23,
-            values: [
-              "0.000",
-              "0.685",
-              "0.858",
-              "1.060",
-              "1.319",
-              "1.714",
-              "2.069",
-              "2.500",
-              "2.807",
-              "3.485",
-              "3.768",
-            ],
-          },
-          {
-            df: 24,
-            values: [
-              "0.000",
-              "0.685",
-              "0.857",
-              "1.059",
-              "1.318",
-              "1.711",
-              "2.064",
-              "2.492",
-              "2.797",
-              "3.467",
-              "3.745",
-            ],
-          },
-          {
-            df: 25,
-            values: [
-              "0.000",
-              "0.684",
-              "0.856",
-              "1.058",
-              "1.316",
-              "1.708",
-              "2.060",
-              "2.485",
-              "2.787",
-              "3.450",
-              "3.725",
-            ],
-          },
-          {
-            df: 26,
-            values: [
-              "0.000",
-              "0.684",
-              "0.856",
-              "1.058",
-              "1.315",
-              "1.706",
-              "2.056",
-              "2.479",
-              "2.779",
-              "3.435",
-              "3.707",
-            ],
-          },
-          {
-            df: 27,
-            values: [
-              "0.000",
-              "0.684",
-              "0.855",
-              "1.057",
-              "1.314",
-              "1.703",
-              "2.052",
-              "2.473",
-              "2.771",
-              "3.421",
-              "3.690",
-            ],
-          },
-          {
-            df: 28,
-            values: [
-              "0.000",
-              "0.683",
-              "0.855",
-              "1.056",
-              "1.313",
-              "1.701",
-              "2.048",
-              "2.467",
-              "2.763",
-              "3.408",
-              "3.674",
-            ],
-          },
-          {
-            df: 29,
-            values: [
-              "0.000",
-              "0.683",
-              "0.854",
-              "1.055",
-              "1.311",
-              "1.699",
-              "2.045",
-              "2.462",
-              "2.756",
-              "3.396",
-              "3.659",
-            ],
-          },
-          {
-            df: 30,
-            values: [
-              "0.000",
-              "0.683",
-              "0.854",
-              "1.055",
-              "1.310",
-              "1.697",
-              "2.042",
-              "2.457",
-              "2.750",
-              "3.385",
-              "3.646",
-            ],
-          },
-          {
-            df: 40,
-            values: [
-              "0.000",
-              "0.681",
-              "0.851",
-              "1.050",
-              "1.303",
-              "1.684",
-              "2.021",
-              "2.423",
-              "2.704",
-              "3.307",
-              "3.551",
-            ],
-          },
-          {
-            df: 60,
-            values: [
-              "0.000",
-              "0.679",
-              "0.848",
-              "1.045",
-              "1.296",
-              "1.671",
-              "2.000",
-              "2.390",
-              "2.660",
-              "3.232",
-              "3.460",
-            ],
-          },
-          {
-            df: 80,
-            values: [
-              "0.000",
-              "0.678",
-              "0.846",
-              "1.043",
-              "1.292",
-              "1.664",
-              "1.990",
-              "2.374",
-              "2.639",
-              "3.195",
-              "3.416",
-            ],
-          },
-          {
-            df: 100,
-            values: [
-              "0.000",
-              "0.677",
-              "0.845",
-              "1.042",
-              "1.290",
-              "1.660",
-              "1.984",
-              "2.364",
-              "2.626",
-              "3.174",
-              "3.390",
-            ],
-          },
-          {
-            df: "Z",
-            values: [
-              "0.000",
-              "0.674",
-              "0.842",
-              "1.036",
-              "1.282",
-              "1.645",
-              "1.960",
-              "2.326",
-              "2.576",
-              "3.090",
-              "3.291",
-            ],
-          },
-        ],
-      };
+      // Toggle between tables
+      const oneTailBtn = document.getElementById("oneTailBtn");
+      const twoTailBtn = document.getElementById("twoTailBtn");
+      const oneTailTable = document.getElementById("oneTailTable");
+      const twoTailTable = document.getElementById("twoTailTable");
 
-      // Tooltip explanations
-      const tooltips = {
-        "cum. prob": "Cumulative probability (confidence level)",
-        "t₅₀":
-          "Critical t-value for 50% confidence (0.50 one-tail, 1.00 two-tail)",
-        "t₇₅":
-          "Critical t-value for 75% confidence (0.25 one-tail, 0.50 two-tail)",
-        "t₈₀":
-          "Critical t-value for 80% confidence (0.20 one-tail, 0.40 two-tail)",
-        "t₈₅":
-          "Critical t-value for 85% confidence (0.15 one-tail, 0.30 two-tail)",
-        "t₉₀":
-          "Critical t-value for 90% confidence (0.10 one-tail, 0.20 two-tail)",
-        "t₉₅":
-          "Critical t-value for 95% confidence (0.05 one-tail, 0.10 two-tail)",
-        "t₉₇₅":
-          "Critical t-value for 97.5% confidence (0.025 one-tail, 0.05 two-tail)",
-        "t₉₉":
-          "Critical t-value for 99% confidence (0.01 one-tail, 0.02 two-tail)",
-        "t₉₉₅":
-          "Critical t-value for 99.5% confidence (0.005 one-tail, 0.01 two-tail)",
-        "t₉₉₉":
-          "Critical t-value for 99.9% confidence (0.001 one-tail, 0.002 two-tail)",
-        "t₉₉₈":
-          "Critical t-value for 99.8% confidence (0.0005 one-tail, 0.001 two-tail)",
-        "one-tail": "Probability for one-tailed tests",
-        "two-tails": "Probability for two-tailed tests",
-        Confidence: "Confidence level percentage",
-        Z: "Standard normal distribution (Z) values for comparison",
-      };
+      oneTailBtn.addEventListener("click", () => {
+        oneTailBtn.classList.add("active");
+        twoTailBtn.classList.remove("active");
+        oneTailTable.classList.remove("hidden");
+        twoTailTable.classList.add("hidden");
+      });
 
-      // Generate the table
-      function generateTable() {
-        const table = document.getElementById("tTable");
-        table.innerHTML = "";
-
-        // Create header row
-        const headerRow = document.createElement("tr");
-        headerRow.className = "header-row";
-
-        // First header cell (cum. prob)
-        const firstHeader = document.createElement("th");
-        firstHeader.rowSpan = 3;
-        firstHeader.textContent = tTableData.headers[0];
-        firstHeader.className = "tooltip";
-
-        const firstTooltip = document.createElement("span");
-        firstTooltip.className = "tooltiptext";
-        firstTooltip.textContent = tooltips[tTableData.headers[0]];
-
-        firstHeader.appendChild(firstTooltip);
-        headerRow.appendChild(firstHeader);
-
-        // Remaining header cells (t-values)
-        tTableData.headers.slice(1).forEach((header) => {
-          const th = document.createElement("th");
-          th.colSpan = 1;
-          th.textContent = header;
-          th.className = "tooltip";
-
-          const tooltip = document.createElement("span");
-          tooltip.className = "tooltiptext";
-          tooltip.textContent =
-            tooltips[header] || `Critical t-value for ${header}`;
-
-          th.appendChild(tooltip);
-          headerRow.appendChild(th);
-        });
-
-        table.appendChild(headerRow);
-
-        // Create one-tail row
-        const oneTailRow = document.createElement("tr");
-        oneTailRow.className = "prob-row";
-
-        // First cell (one-tail label)
-        const oneTailLabel = document.createElement("td");
-        oneTailLabel.textContent = tTableData.oneTail[0];
-        oneTailLabel.className = "tooltip";
-
-        const oneTailLabelTooltip = document.createElement("span");
-        oneTailLabelTooltip.className = "tooltiptext";
-        oneTailLabelTooltip.textContent = tooltips["one-tail"];
-
-        oneTailLabel.appendChild(oneTailLabelTooltip);
-        oneTailRow.appendChild(oneTailLabel);
-
-        // One-tail probability values
-        tTableData.oneTail.slice(1).forEach((value) => {
-          const td = document.createElement("td");
-          td.textContent = value;
-          td.className = "tooltip";
-
-          const tooltip = document.createElement("span");
-          tooltip.className = "tooltiptext";
-          tooltip.textContent = `One-tailed probability: ${value}`;
-
-          td.appendChild(tooltip);
-          oneTailRow.appendChild(td);
-        });
-
-        table.appendChild(oneTailRow);
-
-        // Create two-tails row
-        const twoTailsRow = document.createElement("tr");
-        twoTailsRow.className = "prob-row";
-
-        // First cell (two-tails label)
-        const twoTailsLabel = document.createElement("td");
-        twoTailsLabel.textContent = tTableData.twoTails[0];
-        twoTailsLabel.className = "tooltip";
-
-        const twoTailsLabelTooltip = document.createElement("span");
-        twoTailsLabelTooltip.className = "tooltiptext";
-        twoTailsLabelTooltip.textContent = tooltips["two-tails"];
-
-        twoTailsLabel.appendChild(twoTailsLabelTooltip);
-        twoTailsRow.appendChild(twoTailsLabel);
-
-        // Two-tails probability values
-        tTableData.twoTails.slice(1).forEach((value) => {
-          const td = document.createElement("td");
-          td.textContent = value;
-          td.className = "tooltip";
-
-          const tooltip = document.createElement("span");
-          tooltip.className = "tooltiptext";
-          tooltip.textContent = `Two-tailed probability: ${value}`;
-
-          td.appendChild(tooltip);
-          twoTailsRow.appendChild(td);
-        });
-
-        table.appendChild(twoTailsRow);
-
-        // Create data rows
-        tTableData.rows.forEach((row) => {
-          const tr = document.createElement("tr");
-          if (row.df === "Z") {
-            tr.className = "z-row";
-          }
-
-          // Add df cell
-          const dfCell = document.createElement("td");
-          dfCell.textContent = row.df;
-          tr.appendChild(dfCell);
-
-          // Add value cells
-          row.values.forEach((value, index) => {
-            const td = document.createElement("td");
-            td.className = "tooltip";
-            td.textContent = value;
-            td.dataset.df = row.df;
-            td.dataset.prob = tTableData.headers[index + 1];
-
-            const tooltip = document.createElement("span");
-            tooltip.className = "tooltiptext";
-            tooltip.textContent =
-              `For df=${row.df}, ${
-                tTableData.headers[index + 1]
-              }: ${value}\n\n` +
-              `One-tail: ${tTableData.oneTail[index + 1]}\n` +
-              `Two-tail: ${tTableData.twoTails[index + 1]}\n` +
-              `Confidence: ${tTableData.confidence[index + 1]}`;
-
-            td.appendChild(tooltip);
-            tr.appendChild(td);
-          });
-
-          table.appendChild(tr);
-        });
-
-        // Create confidence row
-        const confidenceRow = document.createElement("tr");
-        confidenceRow.className = "confidence-row";
-
-        // First cell (Confidence label)
-        const confidenceLabel = document.createElement("td");
-        confidenceLabel.textContent = tTableData.confidence[0];
-        confidenceLabel.className = "tooltip";
-
-        const confidenceLabelTooltip = document.createElement("span");
-        confidenceLabelTooltip.className = "tooltiptext";
-        confidenceLabelTooltip.textContent = tooltips["Confidence"];
-
-        confidenceLabel.appendChild(confidenceLabelTooltip);
-        confidenceRow.appendChild(confidenceLabel);
-
-        // Confidence level values
-        tTableData.confidence.slice(1).forEach((value) => {
-          const td = document.createElement("td");
-          td.textContent = value;
-          td.className = "tooltip";
-
-          const tooltip = document.createElement("span");
-          tooltip.className = "tooltiptext";
-          tooltip.textContent = `Confidence level: ${value}`;
-
-          td.appendChild(tooltip);
-          confidenceRow.appendChild(td);
-        });
-
-        table.appendChild(confidenceRow);
-      }
-
-      // Highlight selected values
-      function highlightValues() {
-        const dfSelect = document.getElementById("dfSelect").value;
-        const probSelect = document.getElementById("probSelect").value;
-
-        // Remove previous highlights
-        document.querySelectorAll("td.highlight").forEach((td) => {
-          td.classList.remove("highlight");
-        });
-
-        if (dfSelect === "all" && probSelect === "all") return;
-
-        if (dfSelect === "all") {
-          // Highlight all rows for selected probability
-          const probIndex = tTableData.headers.indexOf(`t${probSelect}`);
-          if (probIndex !== -1) {
-            document
-              .querySelectorAll(`td:nth-child(${probIndex + 1})`)
-              .forEach((td) => {
-                if (td.textContent !== "df") {
-                  td.classList.add("highlight");
-                }
-              });
-          }
-        } else if (probSelect === "all") {
-          // Highlight all columns for selected df
-          document
-            .querySelectorAll(`td[data-df="${dfSelect}"]`)
-            .forEach((td) => {
-              td.classList.add("highlight");
-            });
-        } else {
-          // Highlight specific cell
-          const probIndex = tTableData.headers.indexOf(`t${probSelect}`);
-          if (probIndex !== -1) {
-            document
-              .querySelectorAll(`td[data-df="${dfSelect}"]`)
-              .forEach((td) => {
-                if (td.cellIndex === probIndex) {
-                  td.classList.add("highlight");
-                }
-              });
-          }
-        }
-
-        // Scroll to the first highlighted element
-        const firstHighlight = document.querySelector(".highlight");
-        if (firstHighlight) {
-          firstHighlight.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }
-
-      // Initialize the table
-      generateTable();
-
-      // Event listeners
-      document
-        .getElementById("highlightBtn")
-        .addEventListener("click", highlightValues);
-
-      document.getElementById("resetBtn").addEventListener("click", () => {
-        document.getElementById("dfSelect").value = "all";
-        document.getElementById("probSelect").value = "all";
-        document.querySelectorAll("td.highlight").forEach((td) => {
-          td.classList.remove("highlight");
-        });
+      twoTailBtn.addEventListener("click", () => {
+        twoTailBtn.classList.add("active");
+        oneTailBtn.classList.remove("active");
+        twoTailTable.classList.remove("hidden");
+        oneTailTable.classList.add("hidden");
       });
 
       // Add hover effect to table cells
@@ -1317,7 +492,6 @@
         const cells = document.querySelectorAll("td");
         cells.forEach((cell) => {
           cell.addEventListener("mouseenter", function () {
-            this.style.transition = "background-color 0.2s ease";
             this.style.backgroundColor = "#e6f7ff";
           });
           cell.addEventListener("mouseleave", function () {
